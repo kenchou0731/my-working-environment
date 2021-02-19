@@ -1,0 +1,12 @@
+#!/bin/bash
+
+MYIP="myip.opendns.com"
+NAME_SERVER="resolver1.opendns.com"
+
+# Use dig
+dig +short ${MYIP} @${NAME_SERVER}
+
+# Use host
+# host ${MYIP} ${NAME_SERVER}
+
+exit 0
