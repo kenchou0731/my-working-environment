@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+if [ $# -eq 0 ]; then
+	FILE="$(ls *.changes)"
+
+	if [ $(echo "${FILE}" | wc -l) -ne 1 ]; then
+		echo "Error: cannot find .changes file" >&2
+		return 1
+	fi
+elif [ $# -eq 1 ]; then
+	FILE=${1}
+else
+	echo "Usage: $0 [.changes file]" >&2
+	exit 2
+fi
+
+echo "${FILE}"
+exit 0
+
+#file=$(basename "$1")
+#format="${file##*.}"
+
+#if [ "x$format" = "xchanges" ]; then
+#	lintian -i -EvIL +pedantic --show-overrides $1
+#else
+#	echo "Please input .changes file"
+#fi
