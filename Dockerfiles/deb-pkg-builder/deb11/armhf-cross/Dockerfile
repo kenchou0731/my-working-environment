@@ -3,10 +3,12 @@
 FROM docker.io/kenchou0731/workspace:deb11-1
 
 # Update APT repo
-RUN apt-get update -qqy \
+RUN dpkg --add-architecture armhf \
+  && apt-get update -qqy \
   && apt-get install -qqy \
   devscripts quilt \
-  autoconf automake libtool cmake
+  autoconf automake libtool cmake \
+  crossbuild-essential-armhf pkg-config:armhf
 
 # Set Locale to "en_US.UTF-8" to avoid warnings
 RUN apt-get install -qqy locales \
