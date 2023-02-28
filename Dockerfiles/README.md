@@ -26,3 +26,5 @@ podman run \
 	* Publish a container’s port(s) to the host
 * -v, --volume
 	* Bind mount a volume
+* -w, --workdir
+	* Working directory inside the container
