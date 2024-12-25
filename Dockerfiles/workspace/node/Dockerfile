@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM docker.io/library/node:19.7.0-bullseye
+FROM docker.io/library/node:23.5-bookworm
 
 # Update APT repo
 RUN apt-get update -qqy \
