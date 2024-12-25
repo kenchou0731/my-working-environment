@@ -1,3 +1,21 @@
+## Build container
+
+```
+podman build --tag docker.io/kenchou0731/workspace:deb12-1 <dir>
+```
+
+## Push container image to docker hub
+
+```
+podman push docker.io/kenchou0731/workspace:deb12-1
+```
+
+## Pull a container image to docker hub
+
+```
+podman pull docker.io/kenchou0731/workspace:deb12-1
+```
+
 ## Run a container
 
 ```
