@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DEBIAN_VERSION="$(cut -d "." -f 1 /etc/debian_version)"
+
+if [ ${DEBIAN_VERSION} -eq 9 ]; then
+	git log --graph --decorate --pretty=oneline --abbrev-commit
+elif [ ${DEBIAN_VERSION} -eq 10 ]; then
+	git log --graph --oneline --all
+elif [ ${DEBIAN_VERSION} -eq 11 ]; then
+	git log --graph --oneline --all
+elif [ ${DEBIAN_VERSION} -eq 12 ]; then
+	git log --graph --oneline --all
+fi
+
