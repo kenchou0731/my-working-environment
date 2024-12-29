@@ -1,0 +1,127 @@
+#!/usr/bin/python3
+
+import os
+import argparse
+import subprocess
+import json
+
+##
+# Constants
+#
+PROGRAM="podman"
+SHARED_DIR="/shared"
+
+###############################################################################
+
+def run_program_command(argv):
+    try:
+        result = subprocess.run(
+            argv,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        return result.stdout
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing podman command: {e.stderr}")
+        return None
+
+def run_program_command_json(argv):
+    try:
+        output = run_program_command(argv)
+        data = json.loads(output)
+        return data
+
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON output: {e}")
+        return None
+
+###############################################################################
+
+def handle_ls_image(args):
+    images = run_program_command_json([PROGRAM, "images", "--format=json"])
+    print("IMAGE_ID".ljust(10) + "TAG".ljust(32))
+    for image in images:
+        image_id = image.get('Id')[:8]
+        image_tags = image.get('Names')
+        if image_tags is not None:
+            print(image_id.ljust(10) + image_tags[0].ljust(32))
+        else:
+            print(image_id.ljust(10) + "<none>".ljust(32))
+
+###############################################################################
+
+def handle_ls(args):
+    containers = run_program_command_json([PROGRAM, "ps", "-a", "--format=json"])
+    print("NAME".ljust(20) + "CONT_ID".ljust(10) + "STATE".ljust(10) + "IMAGE_ID".ljust(10))
+    for container in containers:
+        name=container.get('Names')[0]
+        cont_id=container.get('Id')[:8]
+        state=container.get('State')
+        image_id=container.get('ImageID')[:8]
+        print(name.ljust(20) + cont_id.ljust(10) + state.ljust(10) + image_id.ljust(10))
+        # ports=container.get('Ports')
+        # print(ports)
+
+###############################################################################
+
+def handle_new(args):
+    print(f"Creating container {args.name}")
+    output = run_program_command([PROGRAM, "run",
+        "-d", "-i", "-t", "--privileged",
+        "--name", args.name,
+        "-v", "/dev/pts:/dev/pts",
+        "-v", SHARED_DIR + ":" + SHARED_DIR,
+        args.image])
+    print(output)
+
+###############################################################################
+
+def handle_login(args):
+    print(f"Logging into container {args.name}")
+    os.execvp(PROGRAM, [PROGRAM, "exec",
+        "-i", "-t", args.name, "/bin/bash"])
+
+###############################################################################
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="A command-line tool to manage containers."
+    )
+
+    subparsers = parser.add_subparsers(
+        title="Commands",
+        description="Available actions",
+        help="Use one of these commands",
+        dest="command"
+    )
+
+    # Add the 'lsi' subcommand
+    parser_ls = subparsers.add_parser("lsi", help="List all images")
+    parser_ls.set_defaults(func=handle_ls_image)
+
+    # Add the 'ls' subcommand
+    parser_ls = subparsers.add_parser("ls", help="List all containers")
+    parser_ls.set_defaults(func=handle_ls)
+
+    # Add the 'new' subcommand
+    parser_new = subparsers.add_parser("new", help="Create a new container")
+    parser_new.add_argument("name", type=str, help="Name of the new container")
+    parser_new.add_argument("image", type=str, help="Image ID of the new container")
+    parser_new.set_defaults(func=handle_new)
+
+    # Add the 'login' subcommand
+    parser_login = subparsers.add_parser("login", help="Login to a container")
+    parser_login.add_argument("name", type=str, help="Name of the container to login to")
+    parser_login.set_defaults(func=handle_login)
+
+    args = parser.parse_args()
+    if args.command:
+        args.func(args)
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()

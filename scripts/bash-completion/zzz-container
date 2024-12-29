@@ -1,0 +1,28 @@
+__zzz_container() {
+	local cur action
+
+	cur=${COMP_WORDS[COMP_CWORD]}
+
+	# 1st param (action)
+	if [ ${COMP_CWORD} -eq 1 ]; then
+		COMPREPLY=( $(compgen -W "lsi ls new login" -- ${cur}) )
+	# 2nd param (peripheral name)
+	elif [ ${COMP_CWORD} -eq 2 ]; then
+		action=${COMP_WORDS[COMP_CWORD-1]}
+		if [ "${action}" == "login" ]; then
+			names="$(podman ps -a --format="{{.Names}}")"
+			COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
+		fi
+	# 3rd param (operation)
+	elif [ ${COMP_CWORD} -eq 3 ]; then
+		action=${COMP_WORDS[COMP_CWORD-2]}
+		if [ "${action}" == "new" ] ; then
+			image_ids="$(podman images --format="{{.Id}}")"
+			COMPREPLY=( $(compgen -W "${image_ids}" -- ${cur}) )
+		fi
+	fi
+	return 0
+}
+
+complete -F __zzz_container zzz-container
+
